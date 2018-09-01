@@ -1,6 +1,18 @@
 #!/bin/sh
 
 command=$1
+shift
+
+case "$command" in
+  start ) remote=$1; shift ;;
+esac
+
+while true; do
+  case "$1" in
+    --no-push ) NO_PUSH=true; shift ;;
+    * ) break ;;
+  esac
+done
 
 read_current_version() {
   current_version=$(cat package.json | jq -rc '.version')
