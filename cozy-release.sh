@@ -4,7 +4,9 @@ command=$1
 shift
 
 case "$command" in
-  start ) remote=$1; shift ;;
+  start ) if [[ ! $1 == --* ]]; then
+      remote=$1; shift;
+    fi ;;
 esac
 
 while true; do
