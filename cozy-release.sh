@@ -186,7 +186,6 @@ start() {
   echo "☁️ cozy-release: Releasing version $current_version"
 
   release_branch=release-$current_version
-  git branch -D $release_branch
   git checkout -b $release_branch
   if [ ! $NO_PUSH ]; then
     git push $remote HEAD
