@@ -93,6 +93,13 @@ start() {
   echo "☁️ cozy-release: Fetching $remote"
   git fetch $remote
 
+  existing_release_branch=`git branch | grep ' release-'`
+  if [[ ! -z "${existing_release_branch// }" ]]; then
+    release_branch=`git branch | grep ' release-' | sed -e 's/\*//' |  sed -e 's/^[[:space:]]*//'`
+    echo "❌ cozy-release: A release branch ($release_branch) already exists on $remote. End the previous release or delete $release_branch before starting a new release."
+    exit 1
+  fi
+
   echo "☁️ cozy-release: Checking out master branch"
   git checkout master && git pull
 
