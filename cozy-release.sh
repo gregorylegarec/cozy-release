@@ -55,6 +55,15 @@ bump_version() {
   fi
 }
 
+assert_release_or_patch() {
+  is_release=`git branch | grep "* release-"`
+  is_patch=`git branch | grep "* patch-"`
+  if [[ -z ${is_release// } && -z ${is_patch// } ]]; then
+    echo "❌ cozy-release: You can only tag beta or stable version on release or patch branch. Please check out a release or a patch branch and try again."
+    exit 1
+  fi
+}
+
 get_existing_stable_tag() {
   version=$1
   existing_stable_tag=`git tag --list | grep "^$version\$"`
@@ -62,10 +71,6 @@ get_existing_stable_tag() {
 
 tag_beta() {
   remote=$1
-  branch=$2
-
-  echo "☁️ cozy-release: Checking out $remote/$branch branch"
-  git checkout $branch
 
   read_current_version
 
@@ -94,10 +99,6 @@ tag_beta() {
 
 tag_stable() {
   remote=$1
-  branch=$2
-
-  echo "☁️ cozy-release: Checking out $remote/$branch branch"
-  git checkout $branch
 
   read_current_version
 
@@ -194,41 +195,29 @@ start() {
   compute_next_version $current_version
   bump_version $remote master $next_version
 
-  tag_beta $remote $release_branch
+  tag_beta $remote
 }
 
 beta () {
+  assert_release_or_patch
+
   remote=$1
   if [ ! $NO_PUSH ]; then
     warn_about_beta $remote
   fi
 
-  fetch_remote $remote
-
-  get_existing_release_branch
-  if [[ -z ${existing_release_branch// } ]]; then
-    echo "❌ cozy-release: No release branch exists on $remote. Try run 'cozy-release start' first."
-    exit 1
-  fi
-
-  tag_beta $remote $existing_release_branch
+  tag_beta $remote
 }
 
 stable () {
+  assert_release_or_patch
+
   remote=$1
   if [ ! $NO_PUSH ]; then
     warn_about_stable $remote
   fi
 
-  fetch_remote $remote
-
-  get_existing_release_branch
-  if [[ -z ${existing_release_branch// } ]]; then
-    echo "❌ cozy-release: No release branch exists on $remote. Try run 'cozy-release start' first."
-    exit 1
-  fi
-
-  tag_stable $remote $existing_release_branch
+  tag_stable $remote
 }
 
 case "$command" in
